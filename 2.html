@@ -14,6 +14,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            flex-direction: column;
         }
         .container {
             background-color: #fff;
@@ -22,6 +23,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 80%;
             max-width: 600px;
+            margin-bottom: 20px;
         }
         h1 {
             text-align: center;
@@ -41,6 +43,22 @@
             border-radius: 4px;
             resize: vertical;
         }
+        .button-container {
+            text-align: center;
+        }
+        .next-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .next-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -55,6 +73,10 @@
 
     <label>الطالب الثالث:</label>
     <textarea name="الطالب الثالث" rows="5" placeholder="الإسم:&#10;الكنية&#10;التخصص:"></textarea>
+</div>
+
+<div class="button-container">
+    <a href="3.html" class="next-button">الصفحة التالية</a>
 </div>
 
 </body>
