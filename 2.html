@@ -1,20 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>معلومات الطلاب</title>
-  </head>
-  <body>
-  <br><br> 
-   <center><h1>معلومات الطلاب </h1></cen
-   ter>
-  <label>الطالب الأول:</label>
-          <textarea name="الطالب الأول" rows="5" cols="40" placeholder="الإسم:&#10;الكنية&#10;التخصص:"></textarea><br><br>
-  
-  <label>الطالب الثاني:</label>
-          <textarea name="الطالب الثاني" rows="5" cols="40" placeholder="الإسم&#10;الكنية&#10;التخصص:"></textarea><br><br>
-  
-  <label>الطالب الثالث:</label>
-          <textarea name="الطالب اثالث" rows="5" cols="40" placeholder="الإسم:&#10;الكنية&#10;التخصص:"></textarea><br><br
-          
-       
-  </body>
-  
-  </html>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>معلومات الطلاب</h1>
+    <label>الطالب الأول:</label>
+    <textarea name="الطالب الأول" rows="5" placeholder="الإسم:&#10;الكنية&#10;التخصص:"></textarea>
+
+    <label>الطالب الثاني:</label>
+    <textarea name="الطالب الثاني" rows="5" placeholder="الإسم:&#10;الكنية&#10;التخصص:"></textarea>
+
+    <label>الطالب الثالث:</label>
+    <textarea name="الطالب الثالث" rows="5" placeholder="الإسم:&#10;الكنية&#10;التخصص:"></textarea>
+</div>
+
+</body>
+</html>
