@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نافذة منبثقة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F4F4F4; /* لون خلفية فاتح */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333; /* لون نص داكن */
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #333; /* لون داكن */
+            font-size: 36px; /* حجم الخط كبير */
+            font-weight: bold; /* خط عريض */
+            margin-bottom: 20px;
+        }
+
+        .open-btn, .create-btn {
+            padding: 15px 30px;
+            margin: 20px;
+            background-color: #4CAF50; /* لون خلفية زاهٍ */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .open-btn:hover, .create-btn:hover {
+            background-color: #45a049; /* لون خلفية عند التمرير */
+        }
+
+        .modal {
+            display: none; /* لإظهار النافذة المنبثقة */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5); /* خلفية نصف شفافة */
+        }
+
+        .modal-content {
+            background-color: white; /* لون خلفية النافذة المنبثقة */
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+
+        .close-btn {
+            color: #333;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #888;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #333; /* لون نص داكن */
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #FFF; /* لون خلفية فاتح */
+            color: #333; /* لون نص داكن */
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50; /* لون زر */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049; /* لون زر عند التمرير */
+        }
+    </style>
+</head>
+<body>
+    <h1>أهلا بكم في موقعنا التعليمي</h1>
+    <button class="open-btn" onclick="openLoginModal()">Log In</button>
+    <button class="create-btn" onclick="openCreateModal()">Create Account</button>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
+            <h2>تسجيل الدخول</h2>
+            <label for="username">User Name</label>
+            <input type="text" id="username" name="username">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password">
+            <button onclick="nextPage()">الصفحة التالية</button>
+        </div>
+    </div>
+
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('createModal')">&times;</span>
+            <h2>إنشاء حساب</h2>
+            <label for="newUsername">User Name</label>
+            <input type="text" id="newUsername" name="newUsername">
+            <label for="newPassword">Password</label>
+            <input type="password" id="newPassword" name="newPassword">
+            <button onclick="nextPage()">الصفحة التالية</button>
+        </div>
+    </div>
+
+    <script>
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        function openCreateModal() {
+            document.getElementById('createModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('loginModal')) {
+                document.getElementById('loginModal').style.display = 'none';
+            }
+            if (event.target == document.getElementById('createModal')) {
+                document.getElementById('createModal').style.display = 'none';
+            }
+        }
+
+        function nextPage() {
+            window.location.href = "2.html"; // فتح صفحة 2.html
+        }
+    </script>
+</body>
+</html>
