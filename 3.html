@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معرض الصور</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            margin-top: 20px;
+            color: #333;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 20px;
+        }
+        .gallery img {
+            width: 100%;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            transition: transform 0.2s;
+        }
+        .gallery img:hover {
+            transform: scale(1.05);
+            border-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>معرض الصور</h1>
+    <div class="gallery">
+        <img src="img/1.jpeg" alt="صورة 1">
+        <img src="img/2.jpeg" alt="صورة 2">
+        <img src="img/3.jpeg" alt="صورة 3">
+        <img src="img/4.jpeg" alt="صورة 4">
+        <img src="img/5.jpeg" alt="صورة 5">
+        <img src="img/6.jpeg" alt="صورة 6">
+        <img src="img/7.jpeg" alt="صورة 7">
+        <img src="img/8.jpeg" alt="صورة 8">
+    </div>
+</body>
+</html>
