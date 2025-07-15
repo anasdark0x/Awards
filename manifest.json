@@ -1,0 +1,15 @@
+{
+    "manifest_version": 3,
+    "name": "تتبع التصفح",
+    "version": "1.0",
+    "description": "إضافة لتتبع المواقع وملفات تعريف الارتباط",
+    "permissions": [
+        "webNavigation",
+        "cookies",
+        "storage",
+        "*://*/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    }
+}
