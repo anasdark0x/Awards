@@ -1,84 +1,47 @@
+
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ناروتو - حلقات الأنمي</title>
+  <meta charset="UTF-8">
+  <title>ناروتو - الحلقة 1</title>
   <style>
     body {
-      margin: 0;
       background-color: #121212;
       color: #fff;
-      font-family: 'Arial', sans-serif;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
+      font-family: Arial, sans-serif;
       text-align: center;
+      padding: 50px;
     }
-
-    h1 {
-      margin-bottom: 20px;
-      color: #f39c12;
+    .episode {
+      background-color: #1e1e1e;
+      padding: 20px;
+      margin: 20px auto;
+      border-radius: 10px;
+      width: 80%;
     }
-
-    .video-player video {
-      width: 100%;
-      border: 2px solid #f39c12;
-      border-radius: 8px;
-    }
-
-    .episodes {
-      margin-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .episodes button {
-      background-color: #f39c12;
-      color: #000;
-      border: none;
-      padding: 10px 15px;
+    a.watch-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #ff5722;
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
       border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.3s;
+      transition: 0.3s;
     }
-
-    .episodes button:hover {
-      background-color: #e67e22;
+    a.watch-btn:hover {
+      background-color: #e64a19;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-<h1>حلقات أنمي ناروتو</h1>
-    <div class="video-player">
-      <video id="player" controls>
-        <source src="naroto/1.mp4" type="video/mp4">
-        المتصفح لا يدعم تشغيل الفيديو.
-      </video>
-    </div>
-    <div class="episodes" id="episode-list"></div>
+
+  <h1>مسلسل ناروتو</h1>
+
+  <div class="episode">
+    <h2>الحلقة 1</h2>
+    <a class="watch-btn" href="https://t.me/anasas121q/3" target="_blank">مشاهدة الحلقة على Telegram</a>
   </div>
 
-  <script>
-    const totalEpisodes = 10; // عدّل الرقم حسب عدد الحلقات المتوفرة
-    const episodeList = document.getElementById("episode-list");
-    const player = document.getElementById("player");
-
-    for (let i = 1; i <= totalEpisodes; i++) {
-      const btn = document.createElement("button");
-      btn.innerText = `حلقة i`;
-      btn.onclick = () => 
-        player.src = `img/{i}.mp4`;
-        player.play();
-      };
-      episodeList.appendChild(btn);
-    }
-  </script>
 </body>
 </html>
