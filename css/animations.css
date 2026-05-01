@@ -1,0 +1,55 @@
+@keyframes breathe {
+  0%, 100% { opacity: 0.62; transform: scale(1); }
+  50% { opacity: 0.92; transform: scale(1.015); }
+}
+
+@keyframes slow-drift {
+  0% { transform: translate3d(-2%, -1%, 0) rotate(0deg); }
+  50% { transform: translate3d(2%, 1.5%, 0) rotate(4deg); }
+  100% { transform: translate3d(-2%, -1%, 0) rotate(0deg); }
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.18; filter: blur(0.2px); }
+  50% { opacity: 0.42; filter: blur(0); }
+}
+
+@keyframes caption-in {
+  from { opacity: 0; transform: translate3d(-50%, 18px, 0); }
+  to { opacity: 1; transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes meteor-flight {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--meteor-x), -12vh, 0) rotate(-22deg) scaleX(0.45);
+  }
+  8% { opacity: 0.95; }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(var(--meteor-x) - 34vw), 112vh, 0) rotate(-22deg) scaleX(1);
+  }
+}
+
+@keyframes modal-rise {
+  from { opacity: 0; transform: translate3d(0, 22px, 0) scale(0.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes halo-turn {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes line-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
