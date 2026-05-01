@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="سماء سدرا | Sidra Sky - تجربة حب رقمية كونية تفاعلية"
+    />
+    <title>سماء سدرا | Sidra Sky</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;600;700;800&family=Reem+Kufi:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;600;700;800&family=Reem+Kufi:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body>
+    <main class="site-shell" id="top">
+      <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeTitle">
+        <div class="welcome-stars" aria-hidden="true"></div>
+        <div class="welcome-veil" aria-hidden="true"></div>
+        <div class="welcome-content">
+          <p class="welcome-kicker">Sidra Sky</p>
+          <h1 id="welcomeTitle">سُدرا</h1>
+          <p class="welcome-subtitle">الكون كله في عيونك</p>
+          <form class="gate-form" id="gateForm" autocomplete="off">
+            <label class="sr-only" for="gateName">اكتبي اسمك لتفتحي السماء</label>
+            <input
+              id="gateName"
+              class="gate-input"
+              name="gateName"
+              type="text"
+              inputmode="text"
+              placeholder="اكتبي اسمك لتفتحي السماء"
+              aria-describedby="gateHint"
+              disabled
+            />
+            <button class="primary-button" id="gateButton" type="submit" disabled>افتحي سماءك</button>
+            <p class="gate-hint" id="gateHint" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="sky-experience is-locked" id="skyExperience" aria-label="سماء سدرا">
+        <div class="cosmic-backdrop" aria-hidden="true">
+          <div class="nebula-layer nebula-layer-a"></div>
+          <div class="nebula-layer nebula-layer-b"></div>
+          <div class="dust-layer"></div>
+          <div class="meteor-layer" id="meteorLayer"></div>
+        </div>
+
+        <div class="morph-stage" id="morphStage" aria-hidden="true">
+          <div class="shape-caption" id="shapeCaption"></div>
+        </div>
+
+        <header class="sky-header">
+          <div>
+            <p class="eyebrow">سماء سدرا</p>
+            <h2>كل نجمة هنا تعرف شيئاً عنك</h2>
+          </div>
+          <div class="discovery-counter" id="discoveryCounter" aria-live="polite">
+            اكتشفتِ 0 من 14 نجمة
+          </div>
+        </header>
+
+        <section class="constellation-panel" aria-labelledby="constellationTitle">
+          <div class="constellation-copy">
+            <p class="eyebrow">Sidra Constellation</p>
+            <h3 id="constellationTitle">كوكبة مصنوعة من معانيك</h3>
+            <p>
+              كل ضوء صغير يفتح رسالة، وكل رسالة تحتفظ بجزء هادئ من السماء.
+            </p>
+          </div>
+          <div class="constellation-map" id="constellationMap" aria-label="كوكبة سدرا">
+            <svg class="constellation-lines" viewBox="0 0 1000 620" preserveAspectRatio="none" aria-hidden="true">
+              <path id="constellationPathA" />
+              <path id="constellationPathB" />
+            </svg>
+          </div>
+        </section>
+
+        <nav class="control-dock" aria-label="أدوات التجربة">
+          <button class="icon-button" id="musicButton" type="button" aria-label="تشغيل أو إيقاف الموسيقى" data-tooltip="الموسيقى">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 18V5l11-2v13" />
+              <circle cx="6" cy="18" r="3" />
+              <circle cx="17" cy="16" r="3" />
+            </svg>
+          </button>
+          <button class="icon-button" id="morphButton" type="button" aria-label="إعادة تشكيل النجوم الآن" data-tooltip="تشكيل النجوم">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2l1.9 6.1H20l-4.9 3.7 1.9 6.2-5-3.8-5 3.8 1.9-6.2L4 8.1h6.1L12 2z" />
+            </svg>
+          </button>
+          <button class="icon-button wide-action" id="longMessageButton" type="button">
+            افتحي الرسالة
+          </button>
+          <button class="icon-button" id="restartButton" type="button" aria-label="إعادة الرحلة" data-tooltip="إعادة الرحلة">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 12a9 9 0 1 0 3-6.7" />
+              <path d="M3 4v6h6" />
+            </svg>
+          </button>
+        </nav>
+
+        <audio id="skyAudio" preload="none"></audio>
+      </section>
+    </main>
+
+    <div class="modal-layer" id="modalLayer" hidden>
+      <div class="modal-scrim" data-close-modal></div>
+      <article class="glass-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button class="modal-close" type="button" data-close-modal aria-label="إغلاق">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 6L6 18" />
+            <path d="M6 6l12 12" />
+          </svg>
+        </button>
+        <p class="modal-kicker" id="modalKicker">رسالة من نجمة</p>
+        <h3 id="modalTitle"></h3>
+        <div class="modal-body" id="modalBody"></div>
+      </article>
+    </div>
+
+    <section class="finale-layer" id="finaleLayer" hidden aria-labelledby="finaleTitle">
+      <div class="finale-card">
+        <p class="eyebrow">كل النجوم انفتحت</p>
+        <h2 id="finaleTitle">سماء صغيرة باسمك</h2>
+        <p class="typewriter-text" id="finaleText"></p>
+        <div class="finale-actions">
+          <button class="primary-button" id="finaleRestartButton" type="button">أعيدي الرحلة من البداية</button>
+          <button class="secondary-button" id="keepSkyButton" type="button">احتفظي بهذه السماء</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="js/messages.js"></script>
+    <script src="js/shapes.js"></script>
+    <script src="js/stars.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
